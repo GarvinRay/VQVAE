@@ -31,7 +31,7 @@ def extract_mnist_codes():
     os.makedirs('extracted_data', exist_ok=True)
     np.save('extracted_data/mnist_discrete_codes.npy', codes)
     
-    print(f"✅ Extracted codes shape: {codes.shape}")
+    print(f"Extracted codes shape: {codes.shape}")
     print(f"Code range: {codes.min()} - {codes.max()}")
     print(f"Vocabulary size: {codes.max() + 1}")
     print("Saved to extracted_data/mnist_discrete_codes.npy")

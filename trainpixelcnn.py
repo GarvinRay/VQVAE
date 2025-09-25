@@ -18,26 +18,21 @@ def train_pixelcnn():
         in_channels=1,
         out_channels=vocab_size,
         num_residual_layer=6,
-        hidden_channels=64
+        hidden_channels=64,
+        vocab_size=vocab_size
     ).to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
     criterion = nn.CrossEntropyLoss()
     
-    for epoch in range(1, 21):
+    for epoch in range(1, 101):
         model.train()
         total_loss = 0
         for batch_idx, (batch_codes,) in enumerate(dataloader):
             batch_codes = batch_codes.to(device)  # [B, H, W]
-
-            inputs = batch_codes.float().unsqueeze(1) / vocab_size  # [B, 1, H, W]
-            
             optimizer.zero_grad()
-
-            logits = model(inputs)  # [B, vocab_size, H, W]
+            logits = model(batch_codes)  # [B, vocab_size, H, W]
             loss = criterion(logits, batch_codes)
-            
-            # 反向传播
             loss.backward()
             optimizer.step()
             

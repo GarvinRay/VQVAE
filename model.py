@@ -7,7 +7,7 @@ class VQVAE(nn.Module):
     def __init__(self, in_channels, hidden_dim, latent_size, num_embeddings, out_channels):
         super().__init__()
         self.encoder = Encoder(in_channels, hidden_dim, latent_size)
-        self.vq = VectorQuantizer(num_embeddings, latent_size)
+        self.vq = VectorQuantizer(num_embeddings, latent_size, 0.25)
         self.decoder = Decoder(latent_size, hidden_dim, out_channels)
         
     def forward(self, x):

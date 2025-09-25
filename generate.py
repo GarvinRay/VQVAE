@@ -5,7 +5,7 @@ import torchvision.utils as vutils
 from model import VQVAE
 from PixelCNN import PixelCNN
 import numpy as np
-
+# PixelCNN 生成indices-> 查询 CodeBook 得到 z_q -> z_q 送入 Decoder -> 生成
 def sample_from_pixelcnn(pixelcnn, batch_size, H, W, vocab_size, device, temperature=0.8):
     """使用 PixelCNN 自回归采样"""
     pixelcnn.eval()
@@ -15,9 +15,7 @@ def sample_from_pixelcnn(pixelcnn, batch_size, H, W, vocab_size, device, tempera
         print(f"Generating {H}x{W} samples...")
         for h in range(H):
             for w in range(W):
-                # 当前状态作为输入
-                inputs = samples.float().unsqueeze(1) / vocab_size  # [B, 1, H, W]
-                logits = pixelcnn(inputs)  # [B, vocab_size, H, W]
+                logits = pixelcnn(samples)  # [B, vocab_size, H, W]
                 
                 # 在当前位置采样
                 logits_hw = logits[:, :, h, w] / temperature  # [B, vocab_size]
@@ -39,7 +37,7 @@ def generate_mnist_images(num_samples=8):
         hidden_dim=64, 
         latent_size=64, 
         num_embeddings=512, 
-        out_channels=1
+        out_channels=1,
     ).to(device)
     vqvae.load_state_dict(torch.load('vqvae_mnist_final.pth', weights_only=True))
     vqvae.eval()
@@ -56,7 +54,8 @@ def generate_mnist_images(num_samples=8):
         in_channels=1,
         out_channels=vocab_size,
         num_residual_layer=6,
-        hidden_channels=64
+        hidden_channels=64,
+        vocab_size=vocab_size
     ).to(device)
     pixelcnn.load_state_dict(torch.load('pixelcnn_final.pth', weights_only=True))
     
@@ -74,7 +73,7 @@ def generate_mnist_images(num_samples=8):
         generated_images = torch.clamp(generated_images, 0, 1)
     
     vutils.save_image(generated_images, 'generated_mnist.png', nrow=4, padding=2)
-    print("✅ Generated images saved as 'generated_mnist.png'")
+    print("Generated images saved")
 
     plt.figure(figsize=(12, 6))
     for i in range(min(num_samples, 8)):
@@ -88,7 +87,7 @@ def generate_mnist_images(num_samples=8):
     plt.savefig('generated_mnist_grid.png', dpi=150, bbox_inches='tight')
     plt.show()
     
-    print("✅ Generation completed!")
+    print("Generation completed!")
 
 if __name__ == '__main__':
     generate_mnist_images(8)

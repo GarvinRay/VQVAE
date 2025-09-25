@@ -18,7 +18,7 @@ def train_vqvae_mnist():
     ).to(device)
     optimizer = optim.Adam(model.parameters(), lr=1e-3)
 
-    for epoch in range(1, 11):  
+    for epoch in range(1, 50):  
         model.train()
         total_loss = 0
         total_recon_loss = 0

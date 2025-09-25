@@ -3,21 +3,26 @@ import torch.nn as nn
 import torch.nn.functional as F
 from MaskedCNN import MaskedCNN
 from ResBlock import ResidualStack
-    
+
 class PixelCNN(nn.Module):
-    def __init__(self, in_channels=1, out_channels=256, num_residual_layer=6, hidden_channels=64):
-        super().__init__()  
-        self.out_channels = out_channels  
-        
-        self.conv1 = MaskedCNN("A", in_channels, hidden_channels, 7, padding=3)
+
+    def __init__(self, in_channels=1, out_channels=256, num_residual_layer=6, hidden_channels=64, vocab_size=512):
+        super().__init__()
+        self.out_channels = out_channels
+
+        self.embedding = nn.Embedding(vocab_size, hidden_channels)
+
+        self.conv1 = MaskedCNN("A", hidden_channels, hidden_channels, 7, padding=3)
         self.res = ResidualStack(hidden_channels, num_residual_layer, hidden_channels)
         self.conv2 = MaskedCNN("B", hidden_channels, hidden_channels, 1)
         self.conv3 = MaskedCNN("B", hidden_channels, hidden_channels, 1)
         self.relu = nn.ReLU()
         self.out = nn.Conv2d(hidden_channels, out_channels, 1)
-    
+
     def forward(self, x):
-        out = self.conv1(x)
+        out = self.embedding(x)  
+        out = out.permute(0, 3, 1, 2) #  [B, hidden_channels, H, W]
+        out = self.conv1(out)
         out = self.res(out)
         out = self.conv2(out)
         out = self.relu(out)
